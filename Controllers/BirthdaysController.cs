@@ -18,8 +18,8 @@ namespace BirthdayAPI.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<List<Birthday>>> Get([FromServices] DataContext context)
         {
-            var birthdays = await context.BirthdayPersons.AsNoTracking().ToListAsync();
-            return birthdays;
+            var birthdayPersons = await context.BirthdayPersons.AsNoTracking().ToListAsync();
+            return birthdayPersons;
         }
 
         [HttpGet]
@@ -29,9 +29,12 @@ namespace BirthdayAPI.Controllers
             int id,
             [FromServices]DataContext context)
         {
-            var category = await context.BirthdayPersons.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            var birthdayPerson = await context.BirthdayPersons.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            
+            if(birthdayPerson == null)
+                return NotFound(new { message = "Não foi possível encontrar aniversariante."});
 
-            return Ok(category);
+            return Ok(birthdayPerson);
         }
         
         [HttpPost]
@@ -96,14 +99,14 @@ namespace BirthdayAPI.Controllers
             int id, 
             [FromServices]DataContext context)
         {
-            var birthday = await context.BirthdayPersons.FirstOrDefaultAsync(x => x.Id == id);
+            var birthdayPerson = await context.BirthdayPersons.FirstOrDefaultAsync(x => x.Id == id);
             
-            if(birthday == null)
+            if(birthdayPerson == null)
                 return NotFound(new { message = "Aniversariante não encontrado." });
 
             try 
             {
-                context.BirthdayPersons.Remove(birthday);
+                context.BirthdayPersons.Remove(birthdayPerson);
                 await context.SaveChangesAsync();
 
                 return Ok(new { message = "Aniversariante removido com sucesso!" });
